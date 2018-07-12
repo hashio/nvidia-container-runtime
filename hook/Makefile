@@ -9,7 +9,7 @@ DIST_DIR  := $(CURDIR)/../dist
 .NOTPARALLEL:
 .PHONY: all
 
-all: ubuntu18.04 ubuntu16.04 ubuntu14.04 debian9 debian8 centos7 amzn2 amzn1
+all: ubuntu18.04 ubuntu16.04 ubuntu14.04 debian9 debian8 centos7 amzn2 amzn1 opensuse_leap15.1
 
 ubuntu%: ARCH := amd64
 ubuntu%: $(CURDIR)/Dockerfile.ubuntu
@@ -52,5 +52,16 @@ amzn%: $(CURDIR)/Dockerfile.amzn
 	                -t "nvidia/hook/amzn:$*" -f Dockerfile.amzn .
 	$(MKDIR) -p $(DIST_DIR)/$@/$(ARCH)
 	$(DOCKER) run --cidfile $@.cid "nvidia/hook/amzn:$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/$@/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
+
+opensuse_leap%: ARCH := x86_64
+opensuse_leap%: $(CURDIR)/Dockerfile.opensuse_leap
+	$(DOCKER) build --build-arg VERSION_ID="$*" \
+	                --build-arg PKG_VERS="$(VERSION)" \
+	                --build-arg PKG_REV="1" \
+	                -t "nvidia/hook/opensuse/leap:$*" -f Dockerfile.opensuse_leap .
+	$(MKDIR) -p $(DIST_DIR)/$@/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/hook/opensuse/leap:$*"
 	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/$@/$(ARCH)/
 	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
