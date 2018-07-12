@@ -23,7 +23,10 @@ Requires: libnvidia-container-tools >= 0.1.0, libnvidia-container-tools < 2.0.0
 Provides a OCI hook to enable GPU support in containers.
 
 %prep
-cp %{SOURCE0} %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} .
+cp %{SOURCE0} %{SOURCE1} %{SOURCE4} .
+%if 0%{?fedora} || 0%{?rhel_version} || 0%{?centos_version}
+cp %{SOURCE2} %{SOURCE3} .
+%endif
 
 %install
 mkdir -p %{buildroot}%{_bindir}
@@ -32,17 +35,21 @@ install -m 755 -t %{buildroot}%{_bindir} nvidia-container-runtime-hook
 mkdir -p %{buildroot}/etc/nvidia-container-runtime
 install -m 644 -t %{buildroot}/etc/nvidia-container-runtime config.toml
 
+%if 0%{?fedora} || 0%{?rhel_version} || 0%{?centos_version}
 mkdir -p %{buildroot}/usr/libexec/oci/hooks.d
 install -m 755 -t %{buildroot}/usr/libexec/oci/hooks.d oci-nvidia-hook
 
 mkdir -p %{buildroot}/usr/share/containers/oci/hooks.d
 install -m 644 -t %{buildroot}/usr/share/containers/oci/hooks.d oci-nvidia-hook.json
+%endif
 
 %files
 %license LICENSE
 %{_bindir}/nvidia-container-runtime-hook
 /etc/nvidia-container-runtime/config.toml
+%if 0%{?fedora} || 0%{?rhel_version} || 0%{?centos_version}
 /usr/libexec/oci/hooks.d/oci-nvidia-hook
 /usr/share/containers/oci/hooks.d/oci-nvidia-hook.json
+%endif
 
 %changelog
