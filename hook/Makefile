@@ -10,7 +10,7 @@ DIST_DIR  := $(CURDIR)/../dist
 .NOTPARALLEL:
 .PHONY: all
 
-all: ubuntu18.04 ubuntu16.04 ubuntu14.04 debian9 debian8 centos7 amzn2 amzn1 opensuse_leap15.1
+all: ubuntu18.04 ubuntu16.04 ubuntu14.04 debian9 debian8 centos7 amzn2 amzn1 opensuse_leap15.0 opensuse_leap15.1
 
 ubuntu%: ARCH := amd64
 ubuntu%: $(CURDIR)/Dockerfile.ubuntu
