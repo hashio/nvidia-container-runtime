@@ -200,7 +200,7 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
 
 %-opensuse_leap15.0: ARCH := x86_64
 %-opensuse_leap15.0:
-	runc="$(shell $(MAKE) -s $@-runc)" && \
+	runc="$(shell $(MAKE) --no-print-directory -s $@-runc)" && \
 	$(DOCKER) build --build-arg VERSION_ID="15.0" \
                         --build-arg RUNC_COMMIT="$${runc}" \
                         --build-arg PKG_VERS="$(VERSION)" \
