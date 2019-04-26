@@ -1,6 +1,7 @@
 # Copyright (c) 2017-2018, NVIDIA CORPORATION. All rights reserved.
 
 DOCKER ?= docker
+MKDIR  ?= mkdir
 
 VERSION := 2.0.0
 PKG_REV := 1
@@ -12,26 +13,38 @@ DIST_DIR  := $(CURDIR)/../dist
 
 all: ubuntu18.04 ubuntu16.04 ubuntu14.04 debian9 debian8 centos7 amzn2 amzn1 opensuse_leap15.0
 
-ubuntu18.04: $(addsuffix -ubuntu18.04, 18.06.1 18.06.0 18.03.1 17.12.1)
+ubuntu18.04: $(addsuffix -ubuntu18.04, 18.09.2 18.06.2 18.09.1 18.09.0 18.06.1 18.06.0 18.03.1 17.12.1)
 
-ubuntu16.04: $(addsuffix -ubuntu16.04, 18.06.1 18.06.0 18.03.1 18.03.0 17.12.1 17.12.0 17.09.1 17.09.0 17.06.2 17.03.2 1.13.1 1.12.6)
+ubuntu16.04: $(addsuffix -ubuntu16.04, 18.09.2 18.06.2 18.09.1 18.09.0 18.06.1 18.06.0 18.03.1 18.03.0 17.12.1 17.12.0 17.09.1 17.09.0 17.06.2 17.03.2 1.13.1 1.12.6)
 
-ubuntu14.04: $(addsuffix -ubuntu14.04, 18.06.1 18.06.0 18.03.1 18.03.0 17.12.1 17.09.1 17.06.2 17.03.2)
+ubuntu14.04: $(addsuffix -ubuntu14.04, 18.09.2 18.06.2 18.06.1 18.06.0 18.03.1 18.03.0 17.12.1 17.09.1 17.06.2 17.03.2)
 
-debian9: $(addsuffix -debian9, 18.06.1 18.06.0 18.03.1 18.03.0 17.12.1 17.12.0 17.09.1 17.09.0 17.06.2 17.03.2)
+debian9: $(addsuffix -debian9, 18.09.2 18.06.2 18.09.1 18.09.0 18.06.1 18.06.0 18.03.1 18.03.0 17.12.1 17.12.0 17.09.1 17.09.0 17.06.2 17.03.2)
 
-debian8: $(addsuffix -debian8, 18.06.1 18.06.0 18.03.1 18.03.0 17.12.1 17.09.1 17.06.2)
+debian8: $(addsuffix -debian8, 18.06.2 18.06.1 18.06.0 18.03.1 18.03.0 17.12.1 17.09.1 17.06.2)
 
-centos7: $(addsuffix -centos7, 18.06.1 18.06.0 18.03.1 18.03.0 17.12.1 17.12.0 17.09.1 17.09.0 17.06.2 17.03.2 1.13.1 1.12.6)
+centos7: $(addsuffix -centos7, 18.09.2 18.06.2 18.09.1 18.09.0 18.06.1 18.06.0 18.03.1 18.03.0 17.12.1 17.12.0 17.09.1 17.09.0 17.06.2 17.03.2 1.13.1 1.12.6)
 
-amzn2: $(addsuffix -amzn2, 18.06.1 18.03.1 17.06.2)
+amzn2: $(addsuffix -amzn2, 18.06.2 18.06.1 18.03.1 17.06.2)
 
-amzn1: $(addsuffix -amzn1, 18.06.1 18.03.1 17.12.1 17.09.1 17.06.2 17.03.2)
+amzn1: $(addsuffix -amzn1, 18.06.2 18.06.1 18.03.1 17.12.1 17.09.1 17.06.2 17.03.2)
+
+opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 18.09.1)
+
+18.09.2-%-runc:
+	echo "6635b4f0c6af3810594d2770f662f34ddc15b40d"
+
+18.09.1-%-runc:
+	echo "96ec2177ae841256168fcf76954f7177af9446eb"
+
+18.09.0-%-runc:
+	echo "4fc53a81fb7c994640722ac585fa9ca548971871"
+
+18.06.2-%-runc:
+	echo "6635b4f0c6af3810594d2770f662f34ddc15b40d"
 
 18.06.1-%-runc:
 	echo "69663f0bd4b60df09991c08812a60108003fa340"
-
-opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
 
 18.06.0-%-runc:
 	echo "69663f0bd4b60df09991c08812a60108003fa340"
@@ -63,6 +76,7 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
 1.12.6-%-runc:
 	echo "50a19c6ff828c58e5dab13830bd3dacde268afe5"
 
+%-ubuntu18.04: ARCH := amd64
 %-ubuntu18.04:
 	runc="$(shell $(MAKE) -s $@-runc)" && \
 	$(DOCKER) build --build-arg VERSION_ID="18.04" \
@@ -70,8 +84,12 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
                         --build-arg PKG_VERS="$(VERSION)+docker$*" \
                         --build-arg PKG_REV="$(PKG_REV)" \
                         -t "nvidia/runtime/ubuntu:18.04-docker$*" -f Dockerfile.ubuntu .
-	$(DOCKER) run --rm -v $(DIST_DIR)/ubuntu18.04:/dist:Z "nvidia/runtime/ubuntu:18.04-docker$*"
+	$(MKDIR) -p $(DIST_DIR)/ubuntu18.04/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/runtime/ubuntu:18.04-docker$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/ubuntu18.04/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
 
+%-ubuntu16.04: ARCH := amd64
 %-ubuntu16.04:
 	runc="$(shell $(MAKE) -s $@-runc)" && \
 	$(DOCKER) build --build-arg VERSION_ID="16.04" \
@@ -79,8 +97,12 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
                         --build-arg PKG_VERS="$(VERSION)+docker$*" \
                         --build-arg PKG_REV="$(PKG_REV)" \
                         -t "nvidia/runtime/ubuntu:16.04-docker$*" -f Dockerfile.ubuntu .
-	$(DOCKER) run --rm -v $(DIST_DIR)/ubuntu16.04:/dist:Z "nvidia/runtime/ubuntu:16.04-docker$*"
+	$(MKDIR) -p $(DIST_DIR)/ubuntu16.04/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/runtime/ubuntu:16.04-docker$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/ubuntu16.04/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
 
+%-ubuntu14.04: ARCH := amd64
 %-ubuntu14.04:
 	runc="$(shell $(MAKE) -s $@-runc)" && \
 	$(DOCKER) build --build-arg VERSION_ID="14.04" \
@@ -88,8 +110,12 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
                         --build-arg PKG_VERS="$(VERSION)+docker$*" \
                         --build-arg PKG_REV="$(PKG_REV)" \
                         -t "nvidia/runtime/ubuntu:14.04-docker$*" -f Dockerfile.ubuntu .
-	$(DOCKER) run --rm -v $(DIST_DIR)/ubuntu14.04:/dist:Z "nvidia/runtime/ubuntu:14.04-docker$*"
+	$(MKDIR) -p $(DIST_DIR)/ubuntu14.04/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/runtime/ubuntu:14.04-docker$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/ubuntu14.04/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
 
+%-debian9: ARCH := amd64
 %-debian9:
 	runc="$(shell $(MAKE) -s $@-runc)" && \
 	$(DOCKER) build --build-arg VERSION_ID="9" \
@@ -97,8 +123,12 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
                         --build-arg PKG_VERS="$(VERSION)+docker$*" \
                         --build-arg PKG_REV="$(PKG_REV)" \
                         -t "nvidia/runtime/debian:9-docker$*" -f Dockerfile.debian .
-	$(DOCKER) run --rm -v $(DIST_DIR)/debian9:/dist:Z "nvidia/runtime/debian:9-docker$*"
+	$(MKDIR) -p $(DIST_DIR)/debian9/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/runtime/debian:9-docker$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/debian9/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
 
+%-debian8: ARCH := amd64
 %-debian8:
 	runc="$(shell $(MAKE) -s $@-runc)" && \
 	$(DOCKER) build --build-arg VERSION_ID="8" \
@@ -106,8 +136,12 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
                         --build-arg PKG_VERS="$(VERSION)+docker$*" \
                         --build-arg PKG_REV="$(PKG_REV)" \
                         -t "nvidia/runtime/debian:8-docker$*" -f Dockerfile.debian .
-	$(DOCKER) run --rm -v $(DIST_DIR)/debian8:/dist:Z "nvidia/runtime/debian:8-docker$*"
+	$(MKDIR) -p $(DIST_DIR)/debian8/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/runtime/debian:8-docker$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/debian8/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
 
+%-centos7: ARCH := x86_64
 %-centos7:
 	runc="$(shell $(MAKE) -s $@-runc)" && \
 	$(DOCKER) build --build-arg VERSION_ID="7" \
@@ -115,8 +149,12 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
                         --build-arg PKG_VERS="$(VERSION)" \
                         --build-arg PKG_REV="$(PKG_REV).docker$*" \
                         -t "nvidia/runtime/centos:7-docker$*" -f Dockerfile.centos .
-	$(DOCKER) run --rm -v $(DIST_DIR)/centos7:/dist:Z "nvidia/runtime/centos:7-docker$*"
+	$(MKDIR) -p $(DIST_DIR)/centos7/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/runtime/centos:7-docker$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/centos7/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
 
+%-amzn2: ARCH := x86_64
 %-amzn2:
 	runc="$(shell $(MAKE) -s $@-runc)" && \
 	$(DOCKER) build --build-arg VERSION_ID="2" \
@@ -124,8 +162,12 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
                         --build-arg PKG_VERS="$(VERSION)" \
                         --build-arg PKG_REV="$(PKG_REV).docker$*.amzn2" \
                         -t "nvidia/runtime/amzn:2-docker$*" -f Dockerfile.amzn .
-	$(DOCKER) run --rm -v $(DIST_DIR)/amzn2:/dist:Z "nvidia/runtime/amzn:2-docker$*"
+	$(MKDIR) -p $(DIST_DIR)/amzn2/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/runtime/amzn:2-docker$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/amzn2/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
 
+%-amzn1: ARCH := x86_64
 %-amzn1:
 	runc="$(shell $(MAKE) -s $@-runc)" && \
 	$(DOCKER) build --build-arg VERSION_ID="1" \
@@ -133,8 +175,13 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
                         --build-arg PKG_VERS="$(VERSION)" \
                         --build-arg PKG_REV="$(PKG_REV).docker$*.amzn1" \
                         -t "nvidia/runtime/amzn:1-docker$*" -f Dockerfile.amzn .
-	$(DOCKER) run --rm -v $(DIST_DIR)/amzn1:/dist:Z "nvidia/runtime/amzn:1-docker$*"
+	$(MKDIR) -p $(DIST_DIR)/amzn1/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/runtime/amzn:1-docker$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/amzn1/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
 
+
+%-opensuse_leap15.0: ARCH := x86_64
 %-opensuse_leap15.0:
 	runc="$(shell $(MAKE) --no-print-directory -s $@-runc)" && \
 	$(DOCKER) build --build-arg VERSION_ID="15.0" \
@@ -142,4 +189,7 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
                         --build-arg PKG_VERS="$(VERSION)" \
                         --build-arg PKG_REV="$(PKG_REV).docker$*" \
                         -t "nvidia/runtime/opensuse/leap:15.0-docker$*" -f Dockerfile.opensuse_leap .
-	$(DOCKER) run --rm -v $(DIST_DIR)/opensuse_leap15.0:/dist:Z "nvidia/runtime/opensuse/leap:15.0-docker$*"
+	$(MKDIR) -p $(DIST_DIR)/opensuse_leap15.0/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/runtime/opensuse/leap:15.0-docker$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/opensuse_leap15.0/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
