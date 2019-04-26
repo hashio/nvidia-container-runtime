@@ -31,6 +31,8 @@ amzn1: $(addsuffix -amzn1, 18.06.2 18.06.1 18.03.1 17.12.1 17.09.1 17.06.2 17.03
 
 opensuse_leap15.1: $(addsuffix -opensuse_leap15.1, 18.09.6 18.09.1)
 
+opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 18.09.6 18.09.1)
+
 18.09.6-%-runc:
 	echo "2b18fe1d885ee5083ef9f0838fee39b62d653e30"
 
@@ -48,8 +50,6 @@ opensuse_leap15.1: $(addsuffix -opensuse_leap15.1, 18.09.6 18.09.1)
 
 18.06.1-%-runc:
 	echo "69663f0bd4b60df09991c08812a60108003fa340"
-
-opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 17.09.1)
 
 18.06.0-%-runc:
 	echo "69663f0bd4b60df09991c08812a60108003fa340"
