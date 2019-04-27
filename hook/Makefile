@@ -10,7 +10,7 @@ DIST_DIR  := $(CURDIR)/../dist
 .NOTPARALLEL:
 .PHONY: all
 
-all: ubuntu18.04 ubuntu16.04 ubuntu14.04 debian9 debian8 centos7 amzn2 amzn1 opensuse_leap15.0
+all: ubuntu18.04 ubuntu16.04 ubuntu14.04 debian9 debian8 centos7 amzn2 amzn1 opensuse_leap15.0 sles12sp3
 
 debian%: ARCH := amd64
 ubuntu%: $(CURDIR)/Dockerfile.ubuntu
@@ -66,3 +66,15 @@ opensuse_leap%: $(CURDIR)/Dockerfile.opensuse_leap
 	$(DOCKER) run --cidfile $@.cid "nvidia/hook/opensuse/leap:$*"
 	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/$@/$(ARCH)/
 	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
+
+sles%: ARCH := x86_64
+sles%: $(CURDIR)/Dockerfile.sles
+	$(DOCKER) build --build-arg VERSION_ID="$*" \
+	                --build-arg PKG_VERS="$(VERSION)" \
+	                --build-arg PKG_REV="2" \
+	                -t "nvidia/hook/suse/sles:$*" -f Dockerfile.sles .
+	$(MKDIR) -p $(DIST_DIR)/$@/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/hook/suse/sles:$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/$@/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
+
