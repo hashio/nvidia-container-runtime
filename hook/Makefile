@@ -1,6 +1,7 @@
 # Copyright (c) 2017-2018, NVIDIA CORPORATION. All rights reserved.
 
 DOCKER ?= docker
+MKDIR  ?= mkdir
 
 VERSION := 1.4.0
 
