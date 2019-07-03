@@ -29,7 +29,10 @@ amzn2: $(addsuffix -amzn2, 18.06.2 18.06.1 18.03.1 17.06.2)
 
 amzn1: $(addsuffix -amzn1, 18.06.2 18.06.1 18.03.1 17.12.1 17.09.1 17.06.2 17.03.2)
 
-opensuse_leap15.1: $(addsuffix -opensuse_leap15.1, 18.09.1)
+opensuse_leap15.1: $(addsuffix -opensuse_leap15.1, 18.09.6 18.09.1)
+
+18.09.6-%-runc:
+	echo "2b18fe1d885ee5083ef9f0838fee39b62d653e30"
 
 18.09.2-%-runc:
 	echo "6635b4f0c6af3810594d2770f662f34ddc15b40d"
