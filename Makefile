@@ -2,7 +2,7 @@
 
 .PHONY: all
 
-all: ubuntu18.04 ubuntu16.04 ubuntu14.04 debian9 debian8 centos7 amzn2 amzn1 opensuse_leap15.0
+all: ubuntu18.04 ubuntu16.04 ubuntu14.04 debian9 debian8 centos7 amzn2 amzn1 opensuse_leap15.0 sles12sp3
 
 # Build all packages for a specific distribution.
 ubuntu18.04: runtime-ubuntu18.04 hook-ubuntu18.04
@@ -22,6 +22,8 @@ amzn2: runtime-amzn2 hook-amzn2
 amzn1: runtime-amzn1 hook-amzn1
 
 opensuse_leap15.0: runtime-opensuse_leap15.0 hook-opensuse_leap15.0
+
+sles12sp3: runtime-sles12sp3 hook-sles12sp3
 
 base-%:
 	make -C $(CURDIR)/base $*
@@ -59,3 +61,6 @@ runtime-%: base-%
 
 %-runtime-opensuse_leap15.0: base-opensuse_leap15.0
 	make -C $(CURDIR)/runtime $*-opensuse_leap15.0
+
+%-runtime-sles12sp3: base-sles12sp3
+	make -C $(CURDIR)/runtime $*-sles12sp3

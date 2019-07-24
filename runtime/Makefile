@@ -34,6 +34,8 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 18.09.1 18.09.6)
 18.09.6-%-runc:
 	echo "6635b4f0c6af3810594d2770f662f34ddc15b40d"
 
+sles12sp3: $(addsuffix -sles12sp3, 18.09.1)
+
 18.09.2-%-runc:
 	echo "6635b4f0c6af3810594d2770f662f34ddc15b40d"
 
@@ -196,3 +198,17 @@ opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 18.09.1 18.09.6)
 	$(DOCKER) run --cidfile $@.cid "nvidia/runtime/opensuse/leap:15.0-docker$*"
 	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/opensuse_leap15.0/$(ARCH)/
 	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
+
+%-sles12sp3: ARCH := x86_64
+%-sles12sp3:
+	runc="$(shell $(MAKE) --no-print-directory -s $@-runc)" && \
+	$(DOCKER) build --build-arg VERSION_ID="12sp3" \
+                        --build-arg RUNC_COMMIT="$${runc}" \
+                        --build-arg PKG_VERS="$(VERSION)" \
+                        --build-arg PKG_REV="$(PKG_REV).docker$*" \
+                        -t "nvidia/runtime/suse/sles:12sp3-docker$*" -f Dockerfile.sles .
+	$(MKDIR) -p $(DIST_DIR)/sles12sp3/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/runtime/suse/sles:12sp3-docker$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/sles12sp3/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
+
