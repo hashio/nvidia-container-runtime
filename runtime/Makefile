@@ -33,10 +33,10 @@ opensuse_leap15.1: $(addsuffix -opensuse_leap15.1, 18.09.6 18.09.1)
 
 opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 18.09.6 18.09.1)
 
+sles12sp3: $(addsuffix -sles12sp3, 18.09.6 18.09.1)
+
 18.09.6-%-runc:
 	echo "2b18fe1d885ee5083ef9f0838fee39b62d653e30"
-
-sles12sp3: $(addsuffix -sles12sp3, 18.09.1)
 
 18.09.2-%-runc:
 	echo "6635b4f0c6af3810594d2770f662f34ddc15b40d"
