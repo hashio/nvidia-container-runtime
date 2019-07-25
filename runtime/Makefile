@@ -11,7 +11,7 @@ DIST_DIR  := $(CURDIR)/../dist
 .NOTPARALLEL:
 .PHONY: all
 
-all: ubuntu18.04 ubuntu16.04 ubuntu14.04 debian9 debian8 centos7 amzn2 amzn1 opensuse_leap15.0
+all: ubuntu18.04 ubuntu16.04 ubuntu14.04 debian9 debian8 centos7 amzn2 amzn1 opensuse_leap15.0 opensuse_leap15.1
 
 ubuntu18.04: $(addsuffix -ubuntu18.04, 18.09.2 18.06.2 18.09.1 18.09.0 18.06.1 18.06.0 18.03.1 17.12.1)
 
@@ -29,12 +29,14 @@ amzn2: $(addsuffix -amzn2, 18.06.2 18.06.1 18.03.1 17.06.2)
 
 amzn1: $(addsuffix -amzn1, 18.06.2 18.06.1 18.03.1 17.12.1 17.09.1 17.06.2 17.03.2)
 
-opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 18.09.1 18.09.6)
+opensuse_leap15.1: $(addsuffix -opensuse_leap15.1, 18.09.6 18.09.1)
 
-sles12sp3: $(addsuffix -sles12sp3, 18.09.1 18.09.6)
+opensuse_leap15.0: $(addsuffix -opensuse_leap15.0, 18.09.6 18.09.1)
+
+sles12sp3: $(addsuffix -sles12sp3, 18.09.6 18.09.1)
 
 18.09.6-%-runc:
-	echo "6635b4f0c6af3810594d2770f662f34ddc15b40d"
+	echo "2b18fe1d885ee5083ef9f0838fee39b62d653e30"
 
 18.09.2-%-runc:
 	echo "6635b4f0c6af3810594d2770f662f34ddc15b40d"
@@ -185,6 +187,18 @@ sles12sp3: $(addsuffix -sles12sp3, 18.09.1 18.09.6)
 	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/amzn1/$(ARCH)/
 	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
 
+%-opensuse_leap15.1: ARCH := x86_64
+%-opensuse_leap15.1:
+	runc="$(shell $(MAKE) -s $@-runc)" && \
+	$(DOCKER) build --build-arg VERSION_ID="15.1" \
+                        --build-arg RUNC_COMMIT="$${runc}" \
+                        --build-arg PKG_VERS="$(VERSION)" \
+                        --build-arg PKG_REV="$(PKG_REV).docker$*" \
+                        -t "nvidia/runtime/opensuse/leap:15.1-docker$*" -f Dockerfile.opensuse_leap .
+	$(MKDIR) -p $(DIST_DIR)/opensuse_leap15.1/$(ARCH)
+	$(DOCKER) run --cidfile $@.cid "nvidia/runtime/opensuse/leap:15.1-docker$*"
+	$(DOCKER) cp $$(cat $@.cid):/dist/. $(DIST_DIR)/opensuse_leap15.1/$(ARCH)/
+	$(DOCKER) rm $$(cat $@.cid) && rm $@.cid
 
 %-opensuse_leap15.0: ARCH := x86_64
 %-opensuse_leap15.0:
